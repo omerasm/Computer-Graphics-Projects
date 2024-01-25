@@ -1,0 +1,75 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #8a95e2;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 20px;
+}
+
+.toolbar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    align-self: center;
+    align-items: baseline;
+    margin-left: 180px;
+}
+
+.color-picker {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    gap: 5px;
+    margin-right: 150px;
+}
+
+.color {
+    display: flex;
+    margin-left: 20px;
+    width: 50px;
+    height: 96.2px;
+    cursor: pointer;
+}
+
+.updown {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    margin-right: 20px;
+    gap: 5px;
+}
+
+.layers {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    margin-right: 20px;
+    gap: 5px;
+}
+
+.axis {
+    display: flex;
+    align-items: center;
+}
+
+
+
+#webgl-canvas {
+    border: 2px solid #000;
+}
+
+button {
+    padding: 10px 21.2px;
+    border: none;
+    background-color: #2c3e50;
+    color: #ecf0f1;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #34495e;
+}
