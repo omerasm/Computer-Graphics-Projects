@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<link rel="stylesheet" href="project/styles.css">
+</head>
+
+<script id="vertex-shader" type="x-shader/x-vertex">
+
+attribute vec4 vPosition;
+attribute vec4 vColor;
+
+varying vec4 fColor;
+
+void
+main()
+{
+    gl_Position = vPosition;
+    fColor = vColor;
+    gl_PointSize = 10.0;
+}
+</script>
+
+<script id="fragment-shader" type="x-shader/x-fragment">
+
+precision mediump float;
+
+varying vec4 fColor;
+
+void
+main()
+{
+    gl_FragColor = fColor;
+}
+</script>
+
+<script type="text/javascript" src="Common/webgl-utils.js"></script>
+<script type="text/javascript" src="Common/initShaders.js"></script>
+<script type="text/javascript" src="Common/MV.js"></script>
+<script type="text/javascript" src="project/fire.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lodash@4.17.20/lodash.min.js"></script>
+
+<body>
+    <div class="main">
+        <div class="toolbar">
+
+        <!-- Tool Selection -->
+        <button onclick="buttonBrush()" id="brush-tool">Brush</button>
+        <button onclick="buttonEraser()" id="eraser-tool">Eraser</button>
+        <button onclick="buttonSelect()" id="selection-tool">Select</button>
+        <button onclick="buttonCopy()" id="copy-tool">Copy</button>
+
+        <button onclick="undo_op()" id="undo">Undo</button>
+        <button onclick="redo_op()" id="redo">Redo</button>
+
+        </div>
+
+        <div class="axis">
+
+            <div class="updown">
+                <button onclick="up_arrow()" id="up_arrow">&#x2191; </button>
+                <button onclick="down_arrow()" id="down_arrow">&#x2193; </button>
+            </div>
+            <div class="layers">
+                <button onclick="layer_1()" id="layer_1">Layer 1</button>
+                <button onclick="layer_2()" id="layer_2">Layer 2</button>
+                <button onclick="layer_3()" id="layer_3">Layer 3</button>
+            </div>
+
+            <canvas id="gl-canvas" width="600" height="600"></canvas>
+
+            <!-- Color Selection -->
+            <div class="color-picker">
+                <button onclick="buttonBlack()" id="red_color" class="color" style="background-color: #000000;" data-color="black"></button>
+                <button onclick="buttonRed()" id="green_color" class="color" style="background-color: #ff0000;" data-color="red" "></button>
+                <button onclick="buttonYellow()" id="blue_color" class="color" style="background-color: #ffff00;" data-color="yellow"></button>
+                <button onclick="buttonGreen()" id="white_color" class="color" style="background-color: #00ff00;" data-color="green"></button>
+                <button onclick="buttonBlue()" id="black_color" class="color" style="background-color: #0000ff;" data-color="blue"></button>
+                <button onclick="buttonMagenta()" id="yellow_color" class="color" style="background-color: #ff00ff;" data-color="magenta"></button>
+                <!-- ... add other colors -->
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
