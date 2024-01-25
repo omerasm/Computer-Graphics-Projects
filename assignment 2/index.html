@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        #bgCanvas {
+            background-image: url('bikiniBottom.gif');
+            background-repeat: no-repeat;
+            width: 1000px;
+            background-size: 100%;
+            display: flex;
+            flex-direction:row ;
+        }
+
+
+        #gl-canvas {
+            margin-top: 0px;
+            margin-left: 50px;
+            background: transparent;
+        }
+
+        #octopusButtons {
+            padding: 10px;
+        }
+        #sliders {
+            padding: 10px;
+        }
+        #slider1 {
+            width: 200px;
+            height: 20px; 
+        }
+        #slider2 {
+            width: 200px;
+            height: 20px;
+        }
+        #slider3 {
+            width: 200px;
+            height: 20px;
+        }
+
+        #animation {
+            padding: 10px;
+        }
+        #saveAnim {
+            margin-left: 14px;
+        }
+        #loadAnim {
+            margin-left: 20px;
+        }
+        #playAnim {
+            margin-left: 20px;
+        }
+    </style>
+</head>
+
+<script id="vertex-shader" type="x-shader/x-vertex">
+    attribute  vec4 vPosition;
+    attribute  vec3 vNormal;
+    attribute  vec2 vTexCoord;
+
+    varying vec4 fColor;
+    varying vec2 fTexCoord;
+    uniform vec4 ambientProduct, diffuseProduct, specularProduct;
+    uniform mat4 modelViewMatrix;
+    uniform mat4 projectionMatrix;
+    uniform vec4 lightPosition;
+    uniform float shininess;
+    void main()
+    {
+
+
+        vec3 pos = -(modelViewMatrix * vPosition).xyz;
+
+        //fixed light postion
+
+        vec3 light = lightPosition.xyz;
+        vec3 L = normalize( light - pos );
+
+
+        vec3 E = normalize( -pos );
+        vec3 H = normalize( L + E );
+
+        vec4 NN = vec4(vNormal,0);
+
+        // Transform vertex normal into eye coordinates
+
+        vec3 N = normalize( (modelViewMatrix*NN).xyz);
+
+        // Compute terms in the illumination equation
+        vec4 ambient = ambientProduct;
+
+        float Kd = max( dot(L, N), 0.0 );
+        vec4  diffuse = Kd*diffuseProduct;
+
+        float Ks = pow( max(dot(N, H), 0.0), shininess );
+        vec4  specular = Ks * specularProduct;
+
+        if( dot(L, N) < 0.0 ) {
+        specular = vec4(0.0, 0.0, 0.0, 1.0);
+        }
+
+        gl_Position = projectionMatrix * modelViewMatrix * vPosition;
+        fColor = ambient + diffuse + specular;
+        fTexCoord = vTexCoord;
+        fColor.r = 1.0;
+    }
+</script>
+
+<script id="fragment-shader" type="x-shader/x-fragment">
+
+precision mediump float;
+
+varying  vec4 fColor;
+varying  vec2 fTexCoord;
+
+uniform sampler2D texture;
+
+void main() 
+{ 
+    gl_FragColor = fColor*texture2D( texture, fTexCoord );
+} 
+</script>
+
+<script type="text/javascript" src="Common/webgl-utils.js"></script>
+<script type="text/javascript" src="Common/initShaders.js"></script>
+<script type="text/javascript" src="Common/MV.js"></script>
+<script type="text/javascript" src="project/octomania.js"></script>
+
+
+<body id="bgCanvas">
+    <div id="buttons">
+        <div id="octopusButtons">
+            <select id="legs" onchange="chooseArm(value);" onfocus="this.selectedIndex = -1;">
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+                <option value="7">7</option>
+                <option value="8">8</option>
+            </select>
+        </div>
+
+        <div id="sliders">
+            <input id="sliderall" type="range" min="-20" max="150" step="5" value="30" />
+            <br />
+            <input id="sliderYall" type="range" min="-180" max="180" step="5" value="0" />
+            <br />
+            <br />
+            <input id="sliderheadX" type="range" min="-180" max="180" step="5" value="0" />
+            <br />
+            <input id="sliderheadY" type="range" min="-180" max="180" step="5" value="0" />
+            <br />
+            <input id="sliderheadZ" type="range" min="-180" max="180" step="5" value="0" />
+            <br />
+            <br />
+            <input id="slidertopjo" type="range" min="-180" max="180" step="5" value="0" />
+            <br />
+            <input id="slidertopYjo" type="range" min="-180" max="180" step="5" value="0" />
+            <br />
+            <br />
+            <input id="slidermidjo" type="range" min="-180" max="180" step="5" value="0" />
+            <br />
+            <input id="slidermidYjo" type="range" min="-180" max="180" step="5" value="0" />
+            <br />
+            <br />
+            <input id="sliderlowjo" type="range" min="-180" max="180" step="5" value="0" />
+            <br />
+            <input id="sliderlowYjo" type="range" min="-180" max="180" step="5" value="0" />
+        </div>
+
+        <div id="animation">
+            <button onclick="toggle_float()" id="saveAnim" >toggle float</button>
+            <button onclick="save_octostate()" id="saveAnim" >save state</button>
+            <button onclick="toggle_animation_custom()" id="playAnim" >custom animation</button>
+            <button onclick="clear_anim()" id="playAnim" >clear animation</button>
+            <button onclick="toggle_animation1()" id="anim1" >animation 1</button>
+            <button onclick="toggle_animation2()" id="anim2" >animation 2</button>
+            <!-- ... add other colors -->
+        </div>
+    </div>
+    <div>
+        <canvas id="gl-canvas" width="1000" height="1000">
+            Oops ... your browser doesn't support the HTML5 canvas element
+        </canvas>
+    </div>
+</body>
+</html>

@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        #bgCanvas {
+            background-color: gray;
+            background-repeat: no-repeat;
+            width: 1000px;
+            background-size: 100%;
+            display: flex;
+            flex-direction:row ;
+        }
+
+        #gl-canvas {
+            margin-top: 0px;
+            margin-left: 50px;
+            background: transparent;
+        }
+
+        #octopusButtons {
+            padding: 10px;
+        }
+        #sliders {
+            padding: 10px;
+        }
+        #slider1 {
+            width: 200px;
+            height: 20px; 
+        }
+        #slider2 {
+            width: 200px;
+            height: 20px;
+        }
+        #slider3 {
+            width: 200px;
+            height: 20px;
+        }
+
+        #animation {
+            padding: 10px;
+        }
+        #saveAnim {
+            margin-left: 14px;
+        }
+        #loadAnim {
+            margin-left: 20px;
+        }
+        #playAnim {
+            margin-left: 20px;
+        }
+    </style>
+</head>
+
+<!--Code in this link was taken as an example https://www.cs.toronto.edu/~jacobson/phong-demo/-->
+
+<script id="vertex-shader-gouraud" type="x-shader/x-vertex">
+
+    precision mediump float;
+
+    attribute  vec4 vPosition;
+    attribute  vec3 vNormal;
+    attribute vec2 vTexCoord;
+
+    uniform vec3 ambientColor;
+    uniform vec3 diffuseColor;
+    uniform vec3 specularColor;
+    uniform float ambientCoeff;
+    uniform float diffuseCoeff;
+    uniform float specularCoeff;
+
+    uniform mat4 modelViewMatrix;
+    uniform mat4 projectionMatrix;
+    uniform vec4 lightPosition;
+    uniform float shininess;
+
+    varying vec2 fTexCoord;
+    varying vec4 fColor;
+    varying vec3 R;
+
+    void main() {
+        vec4 vertPos4 = modelViewMatrix * vPosition;
+        vec3 vertPos = vec3(vertPos4) / vertPos4.w;
+
+        vec3 normalInterp = vec3(modelViewMatrix * vec4(vNormal, 0.0));
+        gl_Position = projectionMatrix * vertPos4;
+
+        vec3 N = normalize(normalInterp);
+        vec3 L = normalize(vec3(lightPosition) - vertPos);
+
+        float lambertian = max(dot(N, L), 0.0);
+        float specular = 0.0;
+
+        if(lambertian > 0.0) {
+            R = reflect(-L, N);
+            vec3 V = normalize(-vertPos);
+            // Compute the specular term
+            float specAngle = max(dot(R, V), 0.0);
+            specular = pow(specAngle, shininess);
+        }
+
+        fColor = vec4(  ambientCoeff * ambientColor +
+                        diffuseCoeff * lambertian * diffuseColor +
+                        specularCoeff * specular * specularColor, 1.0);
+        fTexCoord = vTexCoord;
+
+    }
+</script>
+
+<script id="fragment-shader-gouraud" type="x-shader/x-fragment">
+    precision mediump float;
+    varying vec4 fColor;
+    uniform samplerCube textureM;
+    varying vec3 R;
+
+    void main()
+    {
+        vec4 tex = textureCube(textureM, R);
+        gl_FragColor = fColor * tex;
+    }
+</script>
+
+<script id="vertex-shader-phong" type="x-shader/x-vertex">
+
+    precision mediump float;
+
+    attribute vec4 vPosition;
+    attribute vec3 vNormal;
+    attribute vec2 vTexCoord;
+    uniform mat4 modelViewMatrix;
+    uniform mat4 projectionMatrix;
+
+    varying vec3 normalInterp;
+    varying vec3 vertPos;
+    varying vec2 fTexCoord;
+
+    void main(){
+        vec4 vertPos4 = modelViewMatrix * vPosition;
+        vertPos = vec3(vertPos4) / vertPos4.w;
+        normalInterp = vec3(modelViewMatrix * vec4(vNormal, 0.0));
+
+        gl_Position = projectionMatrix * vertPos4;
+        fTexCoord = vTexCoord;
+    }
+</script>
+
+<script id="fragment-shader-phong" type="x-shader/x-fragment">
+
+    precision mediump float;
+
+    varying vec3 normalInterp;
+    varying vec3 vertPos;
+    vec3 R;
+
+    uniform vec3 ambientColor;
+    uniform vec3 diffuseColor;
+    uniform vec3 specularColor;
+    uniform float ambientCoeff;
+    uniform float diffuseCoeff;
+    uniform float specularCoeff;
+
+    uniform mat4 modelViewMatrix;
+    uniform mat4 projectionMatrix;
+    uniform vec4 lightPosition;
+    uniform float shininess;
+
+    uniform samplerCube textureM;
+
+    void main() {
+        vec3 N = normalize(normalInterp);
+        vec3 L = normalize(vec3(lightPosition) - vertPos);
+
+        // Lambert's cosine law
+        float lambertian = max(dot(N, L), 0.0);
+        float specular = 0.0;
+        if(lambertian > 0.0) {
+            R = reflect(-L, N);      // Reflected light vector
+            vec3 V = normalize(-vertPos); // Vector to viewer
+            // Compute the specular term
+            float specAngle = max(dot(R, V), 0.0);
+            specular = pow(specAngle, shininess);
+        }
+
+        vec4 tex = textureCube(textureM, R);
+        gl_FragColor = vec4(ambientCoeff * ambientColor +
+                            diffuseCoeff * lambertian * diffuseColor +
+                            specularCoeff * specular * specularColor, 1.0) * tex;
+
+    }
+
+</script>
+
+<script type="text/javascript" src="Common/webgl-utils.js"></script>
+<script type="text/javascript" src="Common/initShaders.js"></script>
+<script type="text/javascript" src="Common/MV.js"></script>
+<script type="text/javascript" src="project/breathe.js"></script>
+
+
+<body id="bgCanvas">
+    <div id="buttons">
+        <div id="sliders">
+            aa - urange - vrange
+            <br />
+            <input id="aa" type="range" min="0.001" max="0.999" step="0.001" value="0.6" />
+            <br />
+            <input id="urange" type="range" min="2" max="60" step="2" value="40" />
+            <br />
+            <input id="vrange" type="range" min="1" max="100" step="1" value="32" />
+            <br />
+            <br />
+            rotX - rotY - rotZ - zoom
+            <br />
+            <input id="rotX" type="range" min="-180" max="180" step="5" value="0" />
+            <br />
+            <input id="rotY" type="range" min="-180" max="180" step="5" value="45" />
+            <br />
+            <input id="rotZ" type="range" min="-180" max="180" step="5" value="45" />
+            <br />
+            <input id="zoom" type="range" min="1" max="5" step="0.1" value="1" />
+            <br />
+            <br />
+            <button onclick="toggle_Yrotation()" id="toggle_YRotation" >Toggle Rotation</button>
+            <br />
+            <button onclick="change_mode()" id="changeMode" >Change Mode</button>
+            <br />
+        </div>
+    </div>
+    <div>
+        <canvas id="gl-canvas" width="1000" height="1000">
+            Oops ... your browser doesn't support the HTML5 canvas element
+        </canvas>
+    </div>
+</body>
+</html>
