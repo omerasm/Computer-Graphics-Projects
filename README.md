@@ -8,6 +8,6 @@ Assignments for Computer Graphics course (CS 465)
 * [Assignment 3](https://omerasm.github.io/Computer-Graphics-Projects/assignment%203/index.html)
 
 by  
-Ömer Asım Doğan   21903042 
+Ömer Asım Doğan   21903042  
 Ömer Yavuz Öztürk 21803565  
  
